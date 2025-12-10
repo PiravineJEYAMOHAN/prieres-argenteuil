@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Horaires de prière - Argenteuil</title>
+  <title>Horaires de prière - Argenteuil & Paris</title>
   <style>
     body {
       margin: 0;
@@ -14,6 +14,14 @@
       justify-content: center;
       height: 100vh;
     }
+
+    .container {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: repeat(2, 1fr);
+      grid-template-rows: repeat(2, auto);
+    }
+
     .card {
       background: #020617;
       border-radius: 20px;
@@ -22,6 +30,7 @@
       box-shadow: 0 18px 45px rgba(0,0,0,0.5);
       border: 1px solid #1f2937;
     }
+
     .title {
       font-size: 16px;
       font-weight: 600;
@@ -30,29 +39,26 @@
       color: #38bdf8;
       margin-bottom: 4px;
     }
+
     .city {
       font-size: 20px;
       font-weight: 700;
       margin-bottom: 8px;
     }
+
     .date {
       font-size: 12px;
       color: #9ca3af;
       margin-bottom: 14px;
     }
+
     .line {
       display: flex;
       justify-content: space-between;
-      align-items: center;
       padding: 6px 0;
       font-size: 14px;
     }
-    .line span.name {
-      font-weight: 500;
-    }
-    .line span.time {
-      font-variant-numeric: tabular-nums;
-    }
+
     .next {
       margin-top: 10px;
       padding-top: 8px;
@@ -62,88 +68,144 @@
     }
   </style>
 </head>
+
 <body>
-  <div class="card">
-    <div class="title">Horaires de prière</div>
-    <div class="city">Argenteuil</div>
-    <div class="date" id="today"></div>
+  <div class="container">
+    <!-- ARGENTEUIL AUJOURD'HUI -->
+    <div class="card">
+      <div class="title">Horaires de prière</div>
+      <div class="city">Argenteuil (Aujourd'hui)</div>
+      <div class="date" id="date-arg-now"></div>
 
-    <div class="line"><span class="name">Fajr</span>      <span class="time" id="fajr">--:--</span></div>
-    <div class="line"><span class="name">Chourouq</span>  <span class="time" id="sunrise">--:--</span></div>
-    <div class="line"><span class="name">Dhouhr</span>   <span class="time" id="dhuhr">--:--</span></div>
-    <div class="line"><span class="name">Asr</span>       <span class="time" id="asr">--:--</span></div>
-    <div class="line"><span class="name">Maghreb</span>   <span class="time" id="maghrib">--:--</span></div>
-    <div class="line"><span class="name">Icha</span>      <span class="time" id="isha">--:--</span></div>
+      <div class="line"><span>Fajr</span><span id="arg-now-fajr">--:--</span></div>
+      <div class="line"><span>Chourouq</span><span id="arg-now-sunrise">--:--</span></div>
+      <div class="line"><span>Dhouhr</span><span id="arg-now-dhuhr">--:--</span></div>
+      <div class="line"><span>Asr</span><span id="arg-now-asr">--:--</span></div>
+      <div class="line"><span>Maghreb</span><span id="arg-now-maghrib">--:--</span></div>
+      <div class="line"><span>Icha</span><span id="arg-now-isha">--:--</span></div>
 
-    <div class="next" id="nextPrayer">Calcul de la prochaine prière…</div>
+      <div class="next" id="arg-now-next"></div>
+    </div>
+
+    <!-- PARIS AUJOURD'HUI -->
+    <div class="card">
+      <div class="title">Horaires de prière</div>
+      <div class="city">Paris (Aujourd'hui)</div>
+      <div class="date" id="date-par-now"></div>
+
+      <div class="line"><span>Fajr</span><span id="par-now-fajr">--:--</span></div>
+      <div class="line"><span>Chourouq</span><span id="par-now-sunrise">--:--</span></div>
+      <div class="line"><span>Dhouhr</span><span id="par-now-dhuhr">--:--</span></div>
+      <div class="line"><span>Asr</span><span id="par-now-asr">--:--</span></div>
+      <div class="line"><span>Maghreb</span><span id="par-now-maghrib">--:--</span></div>
+      <div class="line"><span>Icha</span><span id="par-now-isha">--:--</span></div>
+
+      <div class="next" id="par-now-next"></div>
+    </div>
+
+    <!-- ARGENTEUIL DEMAIN -->
+    <div class="card">
+      <div class="title">Horaires de prière</div>
+      <div class="city">Argenteuil (Demain)</div>
+      <div class="date" id="date-arg-tom"></div>
+
+      <div class="line"><span>Fajr</span><span id="arg-tom-fajr">--:--</span></div>
+      <div class="line"><span>Chourouq</span><span id="arg-tom-sunrise">--:--</span></div>
+      <div class="line"><span>Dhouhr</span><span id="arg-tom-dhuhr">--:--</span></div>
+      <div class="line"><span>Asr</span><span id="arg-tom-asr">--:--</span></div>
+      <div class="line"><span>Maghreb</span><span id="arg-tom-maghrib">--:--</span></div>
+      <div class="line"><span>Icha</span><span id="arg-tom-isha">--:--</span></div>
+    </div>
+
+    <!-- PARIS DEMAIN -->
+    <div class="card">
+      <div class="title">Horaires de prière</div>
+      <div class="city">Paris (Demain)</div>
+      <div class="date" id="date-par-tom"></div>
+
+      <div class="line"><span>Fajr</span><span id="par-tom-fajr">--:--</span></div>
+      <div class="line"><span>Chourouq</span><span id="par-tom-sunrise">--:--</span></div>
+      <div class="line"><span>Dhouhr</span><span id="par-tom-dhuhr">--:--</span></div>
+      <div class="line"><span>Asr</span><span id="par-tom-asr">--:--</span></div>
+      <div class="line"><span>Maghreb</span><span id="par-tom-maghrib">--:--</span></div>
+      <div class="line"><span>Icha</span><span id="par-tom-isha">--:--</span></div>
+    </div>
   </div>
 
   <script>
-    async function loadPrayerTimes() {
-      try {
-        const today = new Date();
-        const day   = today.getDate();
-        const month = today.getMonth() + 1;
-        const year  = today.getFullYear();
+    async function fetchTimings(city, dayOffset = 0) {
+      const today = new Date();
+      today.setDate(today.getDate() + dayOffset);
 
-        // URL originale de l'API AlAdhan
-        const baseUrl = `https://api.aladhan.com/v1/timingsByCity/${day}-${month}-${year}?city=Argenteuil&country=France&method=12`;
+      const d = today.getDate();
+      const m = today.getMonth() + 1;
+      const y = today.getFullYear();
 
-        // Version proxifiée pour contourner les restrictions du Dock
-        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(baseUrl)}`;
+      const url = 
+        `https://api.allorigins.win/get?url=${encodeURIComponent(
+          `https://api.aladhan.com/v1/timingsByCity/${d}-${m}-${y}?city=${city}&country=France&method=12`
+        )}`;
 
-        // On appelle le proxy et on récupère le JSON interne
-        const res = await fetch(proxyUrl);
-        const wrapped = await res.json();
-        const data = JSON.parse(wrapped.contents);
+      const resp = await fetch(url);
+      const wrap = await resp.json();
+      const data = JSON.parse(wrap.contents);
 
-        const t = data.data.timings;
-
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        document.getElementById('today').textContent = today.toLocaleDateString('fr-FR', options);
-
-        // Affichage des horaires
-        document.getElementById('fajr').textContent    = t.Fajr;
-        document.getElementById('sunrise').textContent = t.Sunrise;
-        document.getElementById('dhuhr').textContent   = t.Dhuhr;
-        document.getElementById('asr').textContent     = t.Asr;
-        document.getElementById('maghrib').textContent = t.Maghrib;
-        document.getElementById('isha').textContent    = t.Isha;
-
-        updateNextPrayer(t);
-      } catch (e) {
-        document.getElementById('nextPrayer').textContent = "Erreur de chargement des horaires (mode Dock).";
-        console.error(e);
-      }
+      return { timings: data.data.timings, dateObj: today };
     }
 
-    function updateNextPrayer(timings) {
+    function fillCard(prefix, t, dateObj) {
+      const opts = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
+      document.getElementById(`date-${prefix}`).textContent =
+        dateObj.toLocaleDateString("fr-FR", opts);
+
+      document.getElementById(`${prefix}-fajr`).textContent = t.Fajr;
+      document.getElementById(`${prefix}-sunrise`).textContent = t.Sunrise;
+      document.getElementById(`${prefix}-dhuhr`).textContent = t.Dhuhr;
+      document.getElementById(`${prefix}-asr`).textContent = t.Asr;
+      document.getElementById(`${prefix}-maghrib`).textContent = t.Maghrib;
+      document.getElementById(`${prefix}-isha`).textContent = t.Isha;
+    }
+
+    function fillNext(prefix, t) {
       const now = new Date();
-      const today = now.toISOString().split('T')[0];
+      const today = now.toISOString().split("T")[0];
 
       const entries = [
-        { name: "Fajr",    time: timings.Fajr },
-        { name: "Dhouhr",  time: timings.Dhuhr },
-        { name: "Asr",     time: timings.Asr },
-        { name: "Maghreb", time: timings.Maghrib },
-        { name: "Icha",    time: timings.Isha },
+        { name: "Fajr", time: t.Fajr },
+        { name: "Dhouhr", time: t.Dhuhr },
+        { name: "Asr", time: t.Asr },
+        { name: "Maghreb", time: t.Maghrib },
+        { name: "Icha", time: t.Isha },
       ];
 
       let next = null;
-
       for (const e of entries) {
-        const date = new Date(today + 'T' + e.time + ':00');
+        const date = new Date(`${today}T${e.time}:00`);
         if (date > now) { next = e; break; }
       }
 
-      const elt = document.getElementById('nextPrayer');
-      elt.textContent = next
-        ? `Prochaine prière : ${next.name} à ${next.time}`
-        : "Toutes les prières d'aujourd'hui sont passées.";
+      document.getElementById(`${prefix}-next`).textContent =
+        next ? `Prochaine : ${next.name} à ${next.time}` :
+               "Toutes les prières sont passées aujourd'hui.";
     }
 
-    loadPrayerTimes();
-</script>
+    async function loadAll() {
+      const argNow = await fetchTimings("Argenteuil", 0);
+      fillCard("arg-now", argNow.timings, argNow.dateObj);
+      fillNext("arg-now", argNow.timings);
 
+      const parNow = await fetchTimings("Paris", 0);
+      fillCard("par-now", parNow.timings, parNow.dateObj);
+      fillNext("par-now", parNow.timings);
+
+      const argTom = await fetchTimings("Argenteuil", 1);
+      fillCard("arg-tom", argTom.timings, argTom.dateObj);
+
+      const parTom = await fetchTimings("Paris", 1);
+      fillCard("par-tom", parTom.timings, parTom.dateObj);
+    }
+
+    loadAll();
+  </script>
 </body>
 </html>
