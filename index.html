@@ -133,7 +133,7 @@
   </div>
 
   <script>
-    async function fetchTimings(city, dayOffset = 0) {
+    async function fetchTimings(city, country, dayOffset = 0) {
       const today = new Date();
       today.setDate(today.getDate() + dayOffset);
 
@@ -141,12 +141,14 @@
       const m = today.getMonth() + 1;
       const y = today.getFullYear();
 
-      const url = 
-        `https://api.allorigins.win/get?url=${encodeURIComponent(
-          `https://api.aladhan.com/v1/timingsByCity/${d}-${m}-${y}?city=${city}&country=France&method=12`
-        )}`;
+      // URL API AlAdhan correctement formatée
+      const apiUrl =
+        `https://api.aladhan.com/v1/timingsByCity/${d}-${m}-${y}?city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}&method=12`;
 
-      const resp = await fetch(url);
+      // Passer par AllOrigins (corrigé)
+      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
+
+      const resp = await fetch(proxyUrl);
       const wrap = await resp.json();
       const data = JSON.parse(wrap.contents);
 
@@ -175,7 +177,7 @@
         { name: "Dhouhr", time: t.Dhuhr },
         { name: "Asr", time: t.Asr },
         { name: "Maghreb", time: t.Maghrib },
-        { name: "Icha", time: t.Isha },
+        { name: "Icha", time: t.Isha }
       ];
 
       let next = null;
@@ -190,22 +192,27 @@
     }
 
     async function loadAll() {
-      const argNow = await fetchTimings("Argenteuil", 0);
+      // ARGENTEUIL AUJOURD'HUI
+      const argNow = await fetchTimings("Argenteuil", "FR", 0);
       fillCard("arg-now", argNow.timings, argNow.dateObj);
       fillNext("arg-now", argNow.timings);
 
-      const parNow = await fetchTimings("Paris", 0);
+      // PARIS AUJOURD'HUI (correction : Paris + country=FR)
+      const parNow = await fetchTimings("Paris", "FR", 0);
       fillCard("par-now", parNow.timings, parNow.dateObj);
       fillNext("par-now", parNow.timings);
 
-      const argTom = await fetchTimings("Argenteuil", 1);
+      // ARGENTEUIL DEMAIN
+      const argTom = await fetchTimings("Argenteuil", "FR", 1);
       fillCard("arg-tom", argTom.timings, argTom.dateObj);
 
-      const parTom = await fetchTimings("Paris", 1);
+      // PARIS DEMAIN (correction city+country)
+      const parTom = await fetchTimings("Paris", "FR", 1);
       fillCard("par-tom", parTom.timings, parTom.dateObj);
     }
 
     loadAll();
-  </script>
+</script>
+
 </body>
 </html>
