@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Horaires de prière - Argenteuil</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0f172a;
+      color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    .card {
+      background: #020617;
+      border-radius: 20px;
+      padding: 20px 22px;
+      width: 320px;
+      box-shadow: 0 18px 45px rgba(0,0,0,0.5);
+      border: 1px solid #1f2937;
+    }
+    .title {
+      font-size: 16px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #38bdf8;
+      margin-bottom: 4px;
+    }
+    .city {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .date {
+      font-size: 12px;
+      color: #9ca3af;
+      margin-bottom: 14px;
+    }
+    .line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 0;
+      font-size: 14px;
+    }
+    .line span.name {
+      font-weight: 500;
+    }
+    .line span.time {
+      font-variant-numeric: tabular-nums;
+    }
+    .next {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid #1f2937;
+      font-size: 13px;
+      color: #a5b4fc;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="title">Horaires de prière</div>
+    <div class="city">Argenteuil</div>
+    <div class="date" id="today"></div>
+
+    <div class="line"><span class="name">Fajr</span>      <span class="time" id="fajr">--:--</span></div>
+    <div class="line"><span class="name">Chourouq</span>  <span class="time" id="sunrise">--:--</span></div>
+    <div class="line"><span class="name">Dhouhr</span>   <span class="time" id="dhuhr">--:--</span></div>
+    <div class="line"><span class="name">Asr</span>       <span class="time" id="asr">--:--</span></div>
+    <div class="line"><span class="name">Maghreb</span>   <span class="time" id="maghrib">--:--</span></div>
+    <div class="line"><span class="name">Icha</span>      <span class="time" id="isha">--:--</span></div>
+
+    <div class="next" id="nextPrayer">Calcul de la prochaine prière…</div>
+  </div>
+
+  <script>
+    async function loadPrayerTimes() {
+      try {
+        const today = new Date();
+        const day   = today.getDate();
+        const month = today.getMonth() + 1;
+        const year  = today.getFullYear();
+
+        const url = `https://api.aladhan.com/v1/timingsByCity/${day}-${month}-${year}?city=Argenteuil&country=France&method=12`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        const t = data.data.timings;
+
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('today').textContent = today.toLocaleDateString('fr-FR', options);
+
+        document.getElementById('fajr').textContent    = t.Fajr;
+        document.getElementById('sunrise').textContent = t.Sunrise;
+        document.getElementById('dhuhr').textContent   = t.Dhuhr;
+        document.getElementById('asr').textContent     = t.Asr;
+        document.getElementById('maghrib').textContent = t.Maghrib;
+        document.getElementById('isha').textContent    = t.Isha;
+
+        updateNextPrayer(t);
+      } catch (e) {
+        document.getElementById('nextPrayer').textContent = "Erreur de chargement des horaires.";
+      }
+    }
+
+    function updateNextPrayer(timings) {
+      const now = new Date();
+      const today = now.toISOString().split('T')[0];
+
+      const entries = [
+        { name: "Fajr",    time: timings.Fajr },
+        { name: "Dhouhr",  time: timings.Dhuhr },
+        { name: "Asr",     time: timings.Asr },
+        { name: "Maghreb", time: timings.Maghrib },
+        { name: "Icha",    time: timings.Isha },
+      ];
+
+      let next = null;
+
+      for (const e of entries) {
+        const date = new Date(today + 'T' + e.time + ':00');
+        if (date > now) { next = e; break; }
+      }
+
+      const elt = document.getElementById('nextPrayer');
+      elt.textContent = next
+        ? `Prochaine prière : ${next.name} à ${next.time}`
+        : "Toutes les prières d'aujourd'hui sont passées.";
+    }
+
+    loadPrayerTimes();
+  </script>
+</body>
+</html>
