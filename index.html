@@ -86,15 +86,23 @@
         const month = today.getMonth() + 1;
         const year  = today.getFullYear();
 
-        const url = `https://api.aladhan.com/v1/timingsByCity/${day}-${month}-${year}?city=Argenteuil&country=France&method=12`;
-        const res = await fetch(url);
-        const data = await res.json();
+        // URL originale de l'API AlAdhan
+        const baseUrl = `https://api.aladhan.com/v1/timingsByCity/${day}-${month}-${year}?city=Argenteuil&country=France&method=12`;
+
+        // Version proxifiée pour contourner les restrictions du Dock
+        const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(baseUrl)}`;
+
+        // On appelle le proxy et on récupère le JSON interne
+        const res = await fetch(proxyUrl);
+        const wrapped = await res.json();
+        const data = JSON.parse(wrapped.contents);
 
         const t = data.data.timings;
 
         const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
         document.getElementById('today').textContent = today.toLocaleDateString('fr-FR', options);
 
+        // Affichage des horaires
         document.getElementById('fajr').textContent    = t.Fajr;
         document.getElementById('sunrise').textContent = t.Sunrise;
         document.getElementById('dhuhr').textContent   = t.Dhuhr;
@@ -104,7 +112,8 @@
 
         updateNextPrayer(t);
       } catch (e) {
-        document.getElementById('nextPrayer').textContent = "Erreur de chargement des horaires.";
+        document.getElementById('nextPrayer').textContent = "Erreur de chargement des horaires (mode Dock).";
+        console.error(e);
       }
     }
 
@@ -134,6 +143,7 @@
     }
 
     loadPrayerTimes();
-  </script>
+</script>
+
 </body>
 </html>
