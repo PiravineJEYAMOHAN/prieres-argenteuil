@@ -2,48 +2,56 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Horaires de prière - Argenteuil & Paris</title>
+  <title>Horaires de prière</title>
+
+  <!-- Responsive pour téléphone -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <style>
     body {
       margin: 0;
+      padding: 20px;
       font-family: -apple-system, BlinkMacSystemFont, sans-serif;
       background: #0f172a;
       color: #e5e7eb;
       display: flex;
-      align-items: center;
       justify-content: center;
-      height: 100vh;
     }
 
+    /* GRID responsive */
     .container {
       display: grid;
       gap: 20px;
-      grid-template-columns: repeat(2, 1fr);
-      grid-template-rows: repeat(2, auto);
+      width: 100%;
+      max-width: 900px;
+    }
+
+    @media (min-width: 700px) {
+      .container {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     .card {
       background: #020617;
       border-radius: 20px;
-      padding: 20px 22px;
-      width: 320px;
-      box-shadow: 0 18px 45px rgba(0,0,0,0.45);
+      padding: 20px;
+      box-shadow: 0 18px 45px rgba(0,0,0,0.35);
       border: 1px solid #1f2937;
     }
 
     .title {
       font-size: 16px;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
       color: #38bdf8;
-      margin-bottom: 4px;
+      text-transform: uppercase;
+      margin-bottom: 6px;
     }
 
     .city {
       font-size: 20px;
       font-weight: 700;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .date {
@@ -56,11 +64,11 @@
       display: flex;
       justify-content: space-between;
       padding: 6px 0;
-      font-size: 14px;
+      font-size: 15px;
     }
 
     .next {
-      margin-top: 10px;
+      margin-top: 12px;
       padding-top: 8px;
       border-top: 1px solid #1f2937;
       font-size: 13px;
@@ -72,7 +80,7 @@
 <body>
   <div class="container">
 
-    <!-- ARGENTEUIL AUJOURD'HUI -->
+    <!-- ARGENTEUIL TODAY -->
     <div class="card">
       <div class="title">Horaires de prière</div>
       <div class="city">Argenteuil (Aujourd'hui)</div>
@@ -88,7 +96,7 @@
       <div class="next" id="arg-now-next"></div>
     </div>
 
-    <!-- PARIS AUJOURD'HUI -->
+    <!-- PARIS TODAY -->
     <div class="card">
       <div class="title">Horaires de prière</div>
       <div class="city">Paris (Aujourd'hui)</div>
@@ -104,7 +112,7 @@
       <div class="next" id="par-now-next"></div>
     </div>
 
-    <!-- ARGENTEUIL DEMAIN -->
+    <!-- ARGENTEUIL TOMORROW -->
     <div class="card">
       <div class="title">Horaires de prière</div>
       <div class="city">Argenteuil (Demain)</div>
@@ -118,7 +126,7 @@
       <div class="line"><span>Icha</span><span id="arg-tom-isha">--:--</span></div>
     </div>
 
-    <!-- PARIS DEMAIN -->
+    <!-- PARIS TOMORROW -->
     <div class="card">
       <div class="title">Horaires de prière</div>
       <div class="city">Paris (Demain)</div>
@@ -136,27 +144,32 @@
 
   <script>
 
-    /* 🔥 Fonction API sans proxy, 100% compatible GitHub */
-    async function fetchTimings(cityFull, dayOffset = 0) {
-      const today = new Date();
-      today.setDate(today.getDate() + dayOffset);
+    /* FUNCTION : API sans proxy, fonctionne GitHub */
+    async function fetchTimings(address, dayOffset = 0) {
+      const date = new Date();
+      date.setDate(date.getDate() + dayOffset);
 
-      const d = today.getDate();
-      const m = today.getMonth() + 1;
-      const y = today.getFullYear();
+      const d = date.getDate();
+      const m = date.getMonth() + 1;
+      const y = date.getFullYear();
 
-      // timingsByAddress = plus fiable + pas de CORS
-      const apiUrl =
-        `https://api.aladhan.com/v1/timingsByAddress/${d}-${m}-${y}?address=${encodeURIComponent(cityFull)}&method=12`;
+      const url =
+        `https://api.aladhan.com/v1/timingsByAddress/${d}-${m}-${y}?address=${encodeURIComponent(address)}&method=12`;
 
-      const resp = await fetch(apiUrl);
+      const resp = await fetch(url);
       const data = await resp.json();
 
-      return { timings: data.data.timings, dateObj: today };
+      if (!data || !data.data) {
+        return null;
+      }
+
+      return { timings: data.data.timings, dateObj: date };
     }
 
-    function fillCard(prefix, t, dateObj) {
-      const opts = { weekday: "long", year: "numeric", month: "long", day: "numeric" };
+
+    function fill(prefix, t, dateObj) {
+      const opts = { weekday:"long", year:"numeric", month:"long", day:"numeric" };
+
       document.getElementById(`date-${prefix}`).textContent =
         dateObj.toLocaleDateString("fr-FR", opts);
 
@@ -168,22 +181,23 @@
       document.getElementById(`${prefix}-isha`).textContent = t.Isha;
     }
 
-    function fillNext(prefix, t) {
+    function nextPrayer(prefix, t) {
       const now = new Date();
       const today = now.toISOString().split("T")[0];
 
-      const entries = [
-        { name: "Fajr", time: t.Fajr },
-        { name: "Dhouhr", time: t.Dhuhr },
-        { name: "Asr", time: t.Asr },
-        { name: "Maghreb", time: t.Maghrib },
-        { name: "Icha", time: t.Isha },
+      const list = [
+        {name:"Fajr", time:t.Fajr},
+        {name:"Dhouhr", time:t.Dhuhr},
+        {name:"Asr", time:t.Asr},
+        {name:"Maghreb", time:t.Maghrib},
+        {name:"Icha", time:t.Isha},
       ];
 
       let next = null;
-      for (const e of entries) {
-        const date = new Date(`${today}T${e.time}:00`);
-        if (date > now) { next = e; break; }
+
+      for (let e of list) {
+        const dt = new Date(`${today}T${e.time}:00`);
+        if (dt > now) { next = e; break; }
       }
 
       document.getElementById(`${prefix}-next`).textContent =
@@ -191,25 +205,26 @@
                "Toutes les prières sont passées aujourd'hui.";
     }
 
+
     async function loadAll() {
 
-      /* ARGENTEUIL TODAY */
+      /* ARGENTEUIL AUJOURD'HUI */
       const argNow = await fetchTimings("Argenteuil, France", 0);
-      fillCard("arg-now", argNow.timings, argNow.dateObj);
-      fillNext("arg-now", argNow.timings);
+      fill("arg-now", argNow.timings, argNow.dateObj);
+      nextPrayer("arg-now", argNow.timings);
 
-      /* PARIS TODAY */
-      const parNow = await fetchTimings("Paris, France", 0);
-      fillCard("par-now", parNow.timings, parNow.dateObj);
-      fillNext("par-now", parNow.timings);
+      /* PARIS AUJOURD'HUI */
+      const parNow = await fetchTimings("Paris, Île-de-France, France", 0);
+      fill("par-now", parNow.timings, parNow.dateObj);
+      nextPrayer("par-now", parNow.timings);
 
-      /* ARGENTEUIL TOMORROW */
+      /* ARGENTEUIL DEMAIN */
       const argTom = await fetchTimings("Argenteuil, France", 1);
-      fillCard("arg-tom", argTom.timings, argTom.dateObj);
+      fill("arg-tom", argTom.timings, argTom.dateObj);
 
-      /* PARIS TOMORROW */
-      const parTom = await fetchTimings("Paris, France", 1);
-      fillCard("par-tom", parTom.timings, parTom.dateObj);
+      /* PARIS DEMAIN (adresse complète indispensable) */
+      const parTom = await fetchTimings("Paris, Île-de-France, France", 1);
+      fill("par-tom", parTom.timings, parTom.dateObj);
     }
 
     loadAll();
