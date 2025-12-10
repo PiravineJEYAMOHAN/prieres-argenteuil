@@ -27,7 +27,7 @@
       border-radius: 20px;
       padding: 20px 22px;
       width: 320px;
-      box-shadow: 0 18px 45px rgba(0,0,0,0.5);
+      box-shadow: 0 18px 45px rgba(0,0,0,0.45);
       border: 1px solid #1f2937;
     }
 
@@ -71,6 +71,7 @@
 
 <body>
   <div class="container">
+
     <!-- ARGENTEUIL AUJOURD'HUI -->
     <div class="card">
       <div class="title">Horaires de prière</div>
@@ -130,10 +131,13 @@
       <div class="line"><span>Maghreb</span><span id="par-tom-maghrib">--:--</span></div>
       <div class="line"><span>Icha</span><span id="par-tom-isha">--:--</span></div>
     </div>
+
   </div>
 
   <script>
-    async function fetchTimings(city, country, dayOffset = 0) {
+
+    /* 🔥 Fonction API sans proxy, 100% compatible GitHub */
+    async function fetchTimings(cityFull, dayOffset = 0) {
       const today = new Date();
       today.setDate(today.getDate() + dayOffset);
 
@@ -141,16 +145,12 @@
       const m = today.getMonth() + 1;
       const y = today.getFullYear();
 
-      // URL API AlAdhan correctement formatée
+      // timingsByAddress = plus fiable + pas de CORS
       const apiUrl =
-        `https://api.aladhan.com/v1/timingsByCity/${d}-${m}-${y}?city=${encodeURIComponent(city)}&country=${encodeURIComponent(country)}&method=12`;
+        `https://api.aladhan.com/v1/timingsByAddress/${d}-${m}-${y}?address=${encodeURIComponent(cityFull)}&method=12`;
 
-      // Passer par AllOrigins (corrigé)
-      const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(apiUrl)}`;
-
-      const resp = await fetch(proxyUrl);
-      const wrap = await resp.json();
-      const data = JSON.parse(wrap.contents);
+      const resp = await fetch(apiUrl);
+      const data = await resp.json();
 
       return { timings: data.data.timings, dateObj: today };
     }
@@ -177,7 +177,7 @@
         { name: "Dhouhr", time: t.Dhuhr },
         { name: "Asr", time: t.Asr },
         { name: "Maghreb", time: t.Maghrib },
-        { name: "Icha", time: t.Isha }
+        { name: "Icha", time: t.Isha },
       ];
 
       let next = null;
@@ -192,27 +192,28 @@
     }
 
     async function loadAll() {
-      // ARGENTEUIL AUJOURD'HUI
-      const argNow = await fetchTimings("Argenteuil", "FR", 0);
+
+      /* ARGENTEUIL TODAY */
+      const argNow = await fetchTimings("Argenteuil, France", 0);
       fillCard("arg-now", argNow.timings, argNow.dateObj);
       fillNext("arg-now", argNow.timings);
 
-      // PARIS AUJOURD'HUI (correction : Paris + country=FR)
-      const parNow = await fetchTimings("Paris", "FR", 0);
+      /* PARIS TODAY */
+      const parNow = await fetchTimings("Paris, France", 0);
       fillCard("par-now", parNow.timings, parNow.dateObj);
       fillNext("par-now", parNow.timings);
 
-      // ARGENTEUIL DEMAIN
-      const argTom = await fetchTimings("Argenteuil", "FR", 1);
+      /* ARGENTEUIL TOMORROW */
+      const argTom = await fetchTimings("Argenteuil, France", 1);
       fillCard("arg-tom", argTom.timings, argTom.dateObj);
 
-      // PARIS DEMAIN (correction city+country)
-      const parTom = await fetchTimings("Paris", "FR", 1);
+      /* PARIS TOMORROW */
+      const parTom = await fetchTimings("Paris, France", 1);
       fillCard("par-tom", parTom.timings, parTom.dateObj);
     }
 
     loadAll();
-</script>
+  </script>
 
 </body>
 </html>
